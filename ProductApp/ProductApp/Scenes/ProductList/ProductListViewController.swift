@@ -16,7 +16,6 @@ class ProductListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         products = loadProducts()
-
         tableView.registerNibCell(ProductCell.self)
         tableView.dataSource = self
         tableView.delegate = self
@@ -67,6 +66,7 @@ extension ProductListViewController: UITableViewDelegate {
         
         let product = products[indexPath.row]
         let detailViewController = ProductDetailViewController(product: product)
+        detailViewController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(detailViewController, animated: true)
     }
 }
