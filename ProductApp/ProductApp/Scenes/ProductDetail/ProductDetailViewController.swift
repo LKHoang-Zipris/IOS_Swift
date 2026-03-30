@@ -25,7 +25,7 @@ final class ProductDetailViewController: UIViewController {
     }
     
     private func setupUI() {
-        title = "Chi tiết sản phẩm"
+        title = product.name
         view.backgroundColor = .systemBackground
         
         productImageView.layer.cornerRadius = 12
