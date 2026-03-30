@@ -1,98 +1,164 @@
-# 📱 ProductApp (UIKit + XIB)
+# 📱 ProductApp (UIKit + XIB + CollectionView + TabBar)
 
-Ứng dụng iOS hiển thị danh sách sản phẩm và màn hình chi tiết sản phẩm, được xây dựng bằng **UIKit + XIB + UITableView**.
+Ứng dụng iOS hiển thị danh sách sản phẩm với 2 dạng UI:
 
+* 📋 **List (UITableView + XIB)**
+* 🧩 **Grid (UICollectionView + API DummyJSON)**
 
-![Simulator Screen Recording - iPhone 17 Pro - 2026-03-23 at 12 32 17](https://github.com/user-attachments/assets/2955294b-c4e5-4a71-9e4d-3754d2b17976)
+Sử dụng **UIKit + TabBarController**, kết hợp networking, custom UI và navigation flow.
 
+---
+
+## 🎥 Demo
+
+> *(Thêm video/GIF demo tại đây)*
 
 ---
 
 ## 🚀 Tính năng
 
-* Hiển thị danh sách sản phẩm bằng `UITableView`
+### 🏠 Home (CollectionView)
+
+* Hiển thị sản phẩm dạng **grid 2 cột**
+* Fetch API từ DummyJSON
+* Pagination (load thêm khi scroll)
+* Image loading + cache
+* Tap → màn detail
+
+### 🛍 Product (UITableView + XIB)
+
+* Hiển thị danh sách sản phẩm từ JSON local
 * Custom cell (`ProductCell.xib`)
-* Custom header (`ProductHeaderView`)
-* Màn hình chi tiết (`ProductDetailViewController.xib`)
-* Load ảnh từ URL (public image)
-* Navigation giữa List → Detail
+* Custom header
+* Navigation sang detail
+
+### 👤 Profile
+
+* Placeholder screen
 
 ---
 
 ## 🧱 Kiến trúc
 
-* **Model**
+### Model
 
-  * `Product.swift`
+* `Product.swift`
+* `HomeProduct.swift`
+* `ProductResponse.swift`
 
-* **View**
+### View
 
-  * `ProductCell.swift` + `ProductCell.xib`
-  * `ProductHeaderView.swift`
-  * `ProductDetailViewController.xib`
+* `ProductCell.swift + .xib`
+* `HomeProductCell.swift`
+* `ProductHeaderView.swift`
+* `ProductDetailViewController.xib`
+* `HomeProductDetailViewController.swift`
 
-* **Controller**
+### Controller
 
-  * `ProductListViewController.swift`
-  * `ProductDetailViewController.swift`
+* `ProductListViewController.swift`
+* `HomeViewController.swift`
+* `ProductDetailViewController.swift`
+* `HomeProductDetailViewController.swift`
+* `MainTabBarController.swift`
 
-* **Extensions**
+### Networking
 
-  * `UITableView+Reusable.swift`
-  * `UIImageView+Extension.swift`
+* `APIClient.swift`
+* `Endpoint.swift`
+* `APIError.swift`
 
----
+### Services
 
-## 📂 Cấu trúc thư mục
+* `ProductService.swift`
 
-```
-ProductApp/
-├── Model/
-│   └── Product.swift
-├── View/
-│   ├── ProductCell.swift
-│   ├── ProductCell.xib
-│   ├── ProductHeaderView.swift
-│   ├── ProductDetailViewController.swift
-│   └── ProductDetailViewController.xib
-├── Controller/
-│   └── ProductListViewController.swift
-├── Extensions/
-│   ├── UITableView+Reusable.swift
-│   └── UIImageView+Extension.swift
-├── Resources/
-│   └── products.json
-```
+### Extensions
+
+* `UITableView+Reusable.swift`
+* `UICollectionView+Reusable.swift`
+* `UIImageView+Extension.swift`
 
 ---
+
 
 ## 🧩 Công nghệ sử dụng
 
 * UIKit
 * Auto Layout
-* XIB (Interface Builder)
+* XIB
 * UITableView
-* URLSession (load image từ URL)
+* UICollectionView
+* UITabBarController
+* URLSession
+* NSCache (image cache)
 
 ---
 
-## 📄 JSON Data
+## 📊 TabBar Structure
 
-Dữ liệu sản phẩm nằm trong:
-
+```id="6u7r0j"
+Home (CollectionView - API)
+Product (UITableView - Local JSON)
+Profile
 ```
-products.json
+
+### Setup
+
+```swift id="8m4cdu"
+let homeVC = UINavigationController(rootViewController: HomeViewController())
+let productVC = UINavigationController(rootViewController: ProductListViewController())
+let profileVC = UINavigationController(rootViewController: UIViewController())
+
+viewControllers = [homeVC, productVC, profileVC]
 ```
 
-Ví dụ:
+---
 
-```json
+## 🌐 API (DummyJSON)
+
+```id="s3s3lg"
+https://dummyjson.com/products?limit=20&skip=0
+```
+
+### Response
+
+```json id="u4a0s0"
 {
-  "id": 1,
-  "name": "iPhone 15",
-  "price": 22990000,
-  "description": "Điện thoại Apple hiệu năng cao.",
-  "image": "https://..."
+  "products": [...],
+  "total": 100,
+  "skip": 0,
+  "limit": 20
+}
+```
+
+---
+
+## 📋 UITableView Flow
+
+```id="m0b2de"
+ProductListViewController
+        ↓
+ProductDetailViewController
+```
+
+---
+
+## 🧩 UICollectionView Flow
+
+```id="1j6xg6"
+HomeViewController
+        ↓
+HomeProductDetailViewController
+```
+
+---
+
+## 🔄 Pagination
+
+```swift id="5m8m4v"
+let threshold = products.count - 4
+if indexPath.item >= threshold {
+    fetchProducts()
 }
 ```
 
@@ -100,55 +166,50 @@ Ví dụ:
 
 ## 🖼 Load ảnh từ URL
 
-Sử dụng extension:
-
-```swift
-extension UIImageView {
-    func loadImage(from urlString: String) {
-        self.image = nil
-        
-        guard let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-            guard let data = data,
-                  let image = UIImage(data: data) else { return }
-            
-            DispatchQueue.main.async {
-                self?.image = image
-            }
-        }.resume()
+```swift id="jzmb0y"
+URLSession.shared.dataTask(with: url) { data, _, _ in
+    DispatchQueue.main.async {
+        imageView.image = UIImage(data: data)
     }
-}
+}.resume()
 ```
 
 ---
 
-## 🔄 Navigation
+## 🎨 UI Notes
 
-```swift
-func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    let product = products[indexPath.row]
-    let detailVC = ProductDetailViewController(product: product)
-    navigationController?.pushViewController(detailVC, animated: true)
-}
-```
+* Background: custom light gray
+* Card: trắng + bo góc
+* Grid 2 cột
+* Smooth scroll + lazy loading
 
 ---
 
 ## ⚠️ Lưu ý
 
-* Phải connect đúng IBOutlet trong XIB
-* `reuseIdentifier` phải trùng với class name
-* Không dùng `register(class:)` khi dùng XIB → phải dùng `UINib`
-* Khi load ảnh bằng URLSession cần update UI trên main thread
+* XIB phải connect IBOutlet đúng
+* `reuseIdentifier` phải trùng class
+* XIB → dùng `UINib`, không dùng `register(class:)`
+* UI update phải trên main thread
+* Tránh load image lặp → nên cache
 
 ---
 
-## 📈 Nâng cấp trong tương lai
+## 🧠 Best Practices
 
-* [ ] Thêm cache ảnh (NSCache)
-* [ ] Async/await networking
-* [ ] MVVM Architecture
-* [ ] API thật
-* [ ] Search / Filter
+* Tách `setupHierarchy` / `setupConstraints`
+* Dùng `Layout enum` tránh magic numbers
+* Generic register/dequeue cho TableView & CollectionView
+* Tách networking layer
+* Không hardcode URL
+
+
+## 📌 Kết luận
+
+Project này kết hợp:
+
+* UITableView (classic)
+* UICollectionView (modern)
+* Networking + Pagination
+* TabBar navigation
 
