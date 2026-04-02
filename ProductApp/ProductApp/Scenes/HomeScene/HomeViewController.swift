@@ -71,6 +71,7 @@ private extension HomeViewController {
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = Layout.lineSpacing
         layout.minimumInteritemSpacing = Layout.interItemSpacing
+        layout.scrollDirection = .vertical
         layout.sectionInset = UIEdgeInsets(
             top: Layout.sectionInset,
             left: Layout.sectionInset,
@@ -157,7 +158,7 @@ private extension HomeViewController {
 extension HomeViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        products.count
+        return products.count
     }
     
     func collectionView(_ collectionView: UICollectionView,

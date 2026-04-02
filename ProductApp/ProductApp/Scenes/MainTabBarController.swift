@@ -32,7 +32,7 @@ final class MainTabBarController: UITabBarController {
         )
 
         viewControllers = [productNav, homeNav, profileNav]
-        selectedIndex = 1
+        selectedIndex = 2
     }
     
 
@@ -53,8 +53,8 @@ final class MainTabBarController: UITabBarController {
 
     private func setupAppearance() {
         let appearance = UITabBarAppearance()
-        appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = .clear
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .white
 
         appearance.stackedLayoutAppearance.selected.iconColor = .systemBlue
         appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
@@ -67,9 +67,6 @@ final class MainTabBarController: UITabBarController {
         ]
 
         tabBar.standardAppearance = appearance
-
-        if #available(iOS 15.0, *) {
-            tabBar.scrollEdgeAppearance = appearance
-        }
+        tabBar.scrollEdgeAppearance = appearance
     }
 }
